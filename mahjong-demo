@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mahjong Wins 3 Demo</title>
+<style>
+body{
+  margin:0;
+  background:linear-gradient(to bottom,#0f2027,#203a43,#2c5364);
+  font-family:sans-serif;
+  color:white;
+  text-align:center;
+}
+.container{
+  padding:20px;
+}
+h1{
+  color:gold;
+}
+.slot-box{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  font-size:40px;
+  margin:30px 0;
+}
+.tile{
+  background:#111;
+  padding:20px;
+  border-radius:10px;
+  width:80px;
+}
+button{
+  padding:15px 40px;
+  font-size:18px;
+  border:none;
+  border-radius:10px;
+  background:gold;
+  cursor:pointer;
+}
+#hasil{
+  margin-top:20px;
+  font-size:20px;
+  font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🐉 Mahjong Wins 3 Demo</h1>
+  <h2>Saldo: Rp <span id="saldo">100.000</span></h2>
+  <h3>Bet: Rp 5.000</h3>
+
+  <div class="slot-box">
+    <div class="tile" id="t1">🀄</div>
+    <div class="tile" id="t2">🀄</div>
+    <div class="tile" id="t3">🀄</div>
+  </div>
+
+  <button onclick="spin()">SPIN</button>
+
+  <div id="hasil">Tekan SPIN untuk mulai</div>
+</div>
+
+<script>
+let saldo = 100000;
+let bet = 5000;
+
+const symbols = ["🀄","🐉","💎","🔥","🀙"];
+
+function formatRupiah(angka){
+  return angka.toLocaleString("id-ID");
+}
+
+function spin(){
+
+  if(saldo <= 0){
+    alert("Saldo habis! Reset ke Rp100.000");
+    saldo = 100000;
+  }
+
+  saldo -= bet;
+
+  let s1 = symbols[Math.floor(Math.random()*symbols.length)];
+  let s2 = symbols[Math.floor(Math.random()*symbols.length)];
+  let s3 = symbols[Math.floor(Math.random()*symbols.length)];
+
+  document.getElementById("t1").innerText = s1;
+  document.getElementById("t2").innerText = s2;
+  document.getElementById("t3").innerText = s3;
+
+  let win = 0;
+  let hasilText = "";
+
+  // Naga Hitam sering muncul (jika 2 atau 3 naga)
+  if((s1=="🐉" && s2=="🐉") || 
+     (s2=="🐉" && s3=="🐉") || 
+     (s1=="🐉" && s3=="🐉")){
+      win = bet * 15;
+      hasilText = "🐉 NAGA HITAM AKTIF! + Rp " + formatRupiah(win);
+  }
+  // 3 simbol sama
+  else if(s1==s2 && s2==s3){
+      win = bet * 10;
+      hasilText = "🔥 SUPER WIN! + Rp " + formatRupiah(win);
+  }
+  // 2 simbol sama
+  else if(s1==s2 || s2==s3 || s1==s3){
+      win = bet * 5;
+      hasilText = "✨ MENANG! + Rp " + formatRupiah(win);
+  }
+  else{
+      hasilText = "❌ Kalah...";
+  }
+
+  saldo += win;
+
+  if(saldo <= 0){
+    saldo = 100000;
+  }
+
+  document.getElementById("saldo").innerText = formatRupiah(saldo);
+  document.getElementById("hasil").innerText = hasilText;
+}
+</script>
+
+</body>
+</html>
