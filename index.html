@@ -1,492 +1,242 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mahjong Ways 3 Slot Demo</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(135deg, #ff6b35, #f7931e, #ff8e53);
-            background-size: 400% 400%;
-            animation: gradientShift 10s ease infinite;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        /* Particles */
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: gold;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float 3s linear infinite;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(100vh) scale(0); opacity: 1; }
-            100% { transform: translateY(-10px) scale(1); opacity: 0; }
-        }
-        
-        .container {
-            display: flex;
-            height: 100vh;
-            max-width: 480px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        .left-panel {
-            width: 30%;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            color: white;
-        }
-        
-        .right-panel {
-            width: 70%;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.7));
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: 900;
-            color: gold;
-            text-shadow: 0 0 20px gold;
-            text-align: center;
-            margin-bottom: 20px;
-            animation: glow 2s ease-in-out infinite alternate;
-        }
-        
-        @keyframes glow {
-            from { text-shadow: 0 0 20px gold; }
-            to { text-shadow: 0 0 30px gold, 0 0 40px gold; }
-        }
-        
-        .balance {
-            font-size: 28px;
-            font-weight: 900;
-            color: #00ff88;
-            text-shadow: 0 0 10px #00ff88;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .bet-input {
-            width: 100%;
-            padding: 15px;
-            font-size: 18px;
-            border: 2px solid gold;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .bet-input::placeholder {
-            color: rgba(255,255,255,0.7);
-        }
-        
-        .spin-btn {
-            width: 100%;
-            padding: 20px;
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(45deg, gold, #ffd700);
-            border: none;
-            border-radius: 15px;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 10px 30px rgba(255,215,0,0.5);
-            text-transform: uppercase;
-        }
-        
-        .spin-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(255,215,0,0.7);
-        }
-        
-        .spin-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .multipliers {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .multiplier {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            font-weight: 700;
-            color: gold;
-        }
-        
-        .slot-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 5px;
-            background: rgba(0,0,0,0.5);
-            border: 3px solid gold;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            min-height: 300px;
-        }
-        
-        .reel {
-            background: linear-gradient(180deg, #222, #111);
-            border: 2px solid #666;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 70px;
-        }
-        
-        .symbol {
-            font-size: 36px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .symbol.win {
-            animation: winBounce 0.6s ease-in-out;
-            color: gold !important;
-            text-shadow: 0 0 20px gold;
-            transform: scale(1.2);
-        }
-        
-        @keyframes winBounce {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3) rotate(5deg); }
-        }
-        
-        .symbol.spinning {
-            animation: spinSymbol 0.1s linear infinite;
-        }
-        
-        @keyframes spinSymbol {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-        
-        .stat {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: 900;
-            color: #00ff88;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            color: rgba(255,255,255,0.8);
-        }
-        
-        .win-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: linear-gradient(45deg, gold, orange);
-            color: #333;
-            padding: 30px;
-            border-radius: 20px;
-            font-size: 28px;
-            font-weight: 900;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(255,215,0,0.8);
-            animation: popup 0.5s ease-out;
-            z-index: 1000;
-            display: none;
-        }
-        
-        @keyframes popup {
-            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        
-        .reset-btn {
-            width: 100%;
-            padding: 15px;
-            background: rgba(255,255,255,0.2);
-            border: 2px solid silver;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: auto;
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                flex-direction: column;
-                max-width: 100%;
-            }
-            .left-panel, .right-panel {
-                width: 100%;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Dragon Mahjong Gold Demo</title>
+<style>
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:linear-gradient(#7a0000,#300000);
+  color:white;
+  text-align:center;
+}
+header{
+  background:linear-gradient(to right,#b8860b,#ffd700,#b8860b);
+  padding:10px;
+  color:black;
+  font-weight:bold;
+}
+#saldo{
+  margin:10px;
+  font-size:18px;
+}
+#multibar{
+  display:flex;
+  justify-content:center;
+  gap:15px;
+  margin:10px;
+}
+.multi{
+  padding:6px 12px;
+  background:#600000;
+  border-radius:10px;
+}
+.active{
+  background:gold;
+  color:black;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(5,65px);
+  gap:6px;
+  justify-content:center;
+  margin:15px 0;
+}
+.cell{
+  width:65px;
+  height:65px;
+  background:#fff8dc;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  color:black;
+  box-shadow:0 0 5px gold;
+  transition:0.3s;
+}
+.win{
+  animation:flash 0.4s infinite alternate;
+}
+@keyframes flash{
+  from{box-shadow:0 0 5px gold;}
+  to{box-shadow:0 0 20px red;}
+}
+button{
+  padding:10px 18px;
+  border:none;
+  border-radius:20px;
+  background:gold;
+  font-weight:bold;
+  margin:5px;
+}
+#hasil{
+  height:25px;
+  margin-top:10px;
+  font-weight:bold;
+}
+</style>
 </head>
 <body>
-    <div class="particle" style="--delay: 0s"></div>
-    <div class="particle" style="--delay: 1s"></div>
-    <div class="particle" style="--delay: 2s"></div>
-    <div class="particle" style="--delay: 3s"></div>
-    <div class="particle" style="--delay: 4s"></div>
 
-    <div class="container">
-        <div class="left-panel">
-            <div>
-                <div class="logo">🀄 MAHJONG WAYS 3</div>
-                <div class="balance" id="balance">Rp 100.000</div>
-                <input type="number" id="betAmount" class="bet-input" placeholder="Taruhan (Rp 1.000 - 10.000)" min="1000" max="10000" value="1000">
-                <div class="multipliers">
-                    <div class="multiplier">x1</div>
-                    <div class="multiplier">x2</div>
-                    <div class="multiplier">x3</div>
-                    <div class="multiplier">x5</div>
-                </div>
-            </div>
-            <button class="reset-btn" onclick="resetBalance()">Reset Saldo</button>
-        </div>
-        
-        <div class="right-panel">
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-value" id="totalWin">Rp 0</div>
-                    <div class="stat-label">Total Win</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="spinCount">0</div>
-                    <div class="stat-label">Spin</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="maxWin">Rp 0</div>
-                    <div class="stat-label">Max Win</div>
-                </div>
-            </div>
-            
-            <div class="slot-grid" id="slotGrid">
-                <!-- Reels will be generated here -->
-            </div>
-            
-            <button id="spinButton" class="spin-btn" onclick="spin()">🔄 SPIN (Rp 1.000)</button>
-            
-            <div id="winMessage" class="win-message"></div>
-        </div>
-    </div>
+<header>🐉 DRAGON MAHJONG GOLD DEMO</header>
+<div id="saldo">Saldo: Rp 100.000</div>
 
-    <script>
-        const symbols = ['🀄', '🀅', '🀆', '🀇', '🀈', '🀉', '🀊', '🀋', '🀌', '🀍', '🀎', '🐉', '💎', '⭐'];
-        let balance = 100000;
-        let totalWin = 0;
-        let spinCount = 0;
-        let maxWin = 0;
-        let isSpinning = false;
-        const reels = Array(20).fill(0); // 5x4 grid
+<div id="multibar">
+  <div class="multi" id="m1">x1</div>
+  <div class="multi" id="m2">x2</div>
+  <div class="multi" id="m3">x3</div>
+  <div class="multi" id="m5">x5</div>
+</div>
 
-        function updateDisplay() {
-            document.getElementById('balance').textContent = `Rp ${balance.toLocaleString()}`;
-            document.getElementById('totalWin').textContent = `Rp ${totalWin.toLocaleString()}`;
-            document.getElementById('spinCount').textContent = spinCount;
-            document.getElementById('maxWin').textContent = `Rp ${maxWin.toLocaleString()}`;
-            document.getElementById('spinButton').textContent = `🔄 SPIN (Rp ${betAmount.value.toLocaleString()})`;
-            document.getElementById('spinButton').disabled = balance < parseInt(betAmount.value) || isSpinning;
-        }
+<div class="grid" id="grid"></div>
 
-        const betAmount = document.getElementById('betAmount');
-        betAmount.addEventListener('input', updateDisplay);
+<button onclick="spin()">SPIN</button>
+<button onclick="autoSpin()">AUTO</button>
+<button onclick="turboMode()">TURBO</button>
 
-        function createReels() {
-            const grid = document.getElementById('slotGrid');
-            grid.innerHTML = '';
-            for (let i = 0; i < 20; i++) {
-                const reel = document.createElement('div');
-                reel.className = 'reel';
-                reel.dataset.index = i;
-                const sym = document.createElement('div');
-                sym.className = 'symbol';
-                sym.textContent = symbols[0];
-                reel.appendChild(sym);
-                grid.appendChild(reel);
-            }
-        }
+<div id="hasil"></div><script>
+let saldo = 100000;
+let bet = 1000;
+let freeSpin = 0;
+let turbo = false;
+let comboMulti = 1;
 
-        function spin() {
-            if (isSpinning || balance < parseInt(betAmount.value)) return;
-            
-            isSpinning = true;
-            const bet = parseInt(betAmount.value);
-            balance -= bet;
-            spinCount++;
-            
-            // Animate spin
-            const reelsDom = document.querySelectorAll('.reel');
-            reelsDom.forEach((reel, index) => {
-                reel.children[0].classList.add('spinning');
-            });
-            
-            setTimeout(() => {
-                // Generate random result
-                for (let i = 0; i < 20; i++) {
-                    reels[i] = Math.floor(Math.random() * symbols.length);
-                }
-                
-                // Check wins (simple matching logic)
-                let winAmount = 0;
-                const grid = [];
-                for (let row = 0; row < 4; row++) {
-                    for (let col = 0; col < 5; col++) {
-                        grid[row * 5 + col] = reels[row * 5 + col];
-                    }
-                }
-                
-                // Check horizontal wins
-                for (let row = 0; row < 4; row++) {
-                    for (let col = 0; col < 3; col++) {
-                        if (grid[row*5 + col] === grid[row*5 + col + 1] && grid[row*5 + col] === grid[row*5 + col + 2]) {
-                            winAmount += bet * (2 + Math.random() * 10);
-                        }
-                    }
-                }
-                
-                // Check vertical wins
-                for (let col = 0; col < 5; col++) {
-                    for (let row = 0; row < 2; row++) {
-                        if (grid[row*5 + col] === grid[(row+1)*5 + col] && grid[row*5 + col] === grid[(row+2)*5 + col]) {
-                            winAmount += bet * (2 + Math.random() * 8);
-                        }
-                    }
-                }
-                
-                // Random jackpots
-                if (Math.random() < 0.05) {
-                    const multiplier = Math.floor(Math.random() * 5) + 1;
-                    winAmount += bet * multiplier * 10;
-                    showWin(`JACKPOT! x${multiplier}`, winAmount);
-                } else if (winAmount > 0) {
-                    showWin(`Menang! x${Math.floor(winAmount / bet)}`, winAmount);
-                }
-                
-                totalWin += winAmount;
-                balance += winAmount;
-                if (winAmount > maxWin) maxWin = winAmount;
-                
-                // Update symbols
-                reelsDom.forEach((reel, index) => {
-                    reel.children[0].classList.remove('spinning');
-                    reel.children[0].textContent = symbols[reels[index]];
-                    if (winAmount > 0 && Math.random() < 0.3) {
-                        reel.children[0].classList.add('win');
-                        setTimeout(() => reel.children[0].classList.remove('win'), 3000);
-                    }
-                });
-                
-                createParticles(winAmount);
-                updateDisplay();
-                isSpinning = false;
-            }, 2000);
-        }
+const symbols = ["🀄","💰","🐉","🔔","🧧","👑","💎"];
+const wild = "⭐";
+const scatter = "🔥";
 
-        function showWin(text, amount) {
-            const msg = document.getElementById('winMessage');
-            msg.innerHTML = `${text}<br>Rp ${amount.toLocaleString()}`;
-            msg.style.display = 'block';
-            setTimeout(() => {
-                msg.style.display = 'none';
-            }, 3000);
-        }
+const gridEl = document.getElementById("grid");
+const saldoEl = document.getElementById("saldo");
+const hasilEl = document.getElementById("hasil");
 
-        function createParticles(winAmount) {
-            for (let i = 0; i < 20; i++) {
-                setTimeout(() => {
-                    const particle = document.createElement('div');
-                    particle.className = 'particle';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    particle.style.width = particle.style.height = (Math.random() * 6 + 4) + 'px';
-                    particle.style.background = `hsl(${Math.random() * 60 + 30}, 100%, 60%)`;
-                    document.body.appendChild(particle);
-                    
-                    setTimeout(() => particle.remove(), 5000);
-                }, i * 100);
-            }
-        }
+function updateSaldo(){
+  saldoEl.innerText = "Saldo: Rp " + saldo.toLocaleString();
+  if(saldo <= 0){
+    saldo = 100000;
+    alert("Saldo habis! Reset ke Rp100.000");
+  }
+}
 
-        function resetBalance() {
-            balance = 100000;
-            totalWin = 0;
-            spinCount = 0;
-            maxWin = 0;
-            updateDisplay();
-        }
+function randomSymbol(){
+  let r = Math.random();
+  if(r < 0.05) return scatter;
+  if(r < 0.12) return wild;
+  return symbols[Math.floor(Math.random()*symbols.length)];
+}
 
-        // Initialize
-        createReels();
-        updateDisplay();
-        
-        // Auto particles
-        setInterval(() => {
-            if (Math.random() < 0.1) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 5000);
-            }
-        }, 1000);
-    </script>
+function generateGrid(){
+  gridEl.innerHTML = "";
+  let grid = [];
+  for(let i=0;i<30;i++){
+    let sym = randomSymbol();
+    grid.push(sym);
+    let div = document.createElement("div");
+    div.className="cell";
+    div.innerText=sym;
+    gridEl.appendChild(div);
+  }
+  return grid;
+}
+
+function checkScatter(grid){
+  let count = grid.filter(s=>s===scatter).length;
+  if(count >= 3){
+    freeSpin += 8;
+    hasilEl.innerText="🔥 3 Scatter! +8 Free Spins!";
+  }
+}
+
+function getRandomMulti(){
+  let arr=[1,2,3,5];
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function highlightMulti(x){
+  document.querySelectorAll(".multi").forEach(m=>m.classList.remove("active"));
+  document.getElementById("m"+x).classList.add("active");
+}
+
+function checkWin(grid){
+  let win=0;
+  let counted={};
+  grid.forEach(s=>{
+    if(s!==scatter){
+      counted[s]=(counted[s]||0)+1;
+    }
+  });
+
+  for(let key in counted){
+    if(counted[key]>=4){
+      win += bet * (counted[key]/4);
+    }
+  }
+
+  if(win>0){
+    let randMulti = getRandomMulti();
+    highlightMulti(randMulti);
+    comboMulti += 0.5;
+    win = win * randMulti * comboMulti;
+    saldo += win;
+    hasilEl.innerText="Menang Rp "+Math.floor(win);
+    cascade();
+  }else{
+    comboMulti=1;
+    hasilEl.innerText="Tidak menang";
+  }
+}
+
+function cascade(){
+  setTimeout(()=>{
+    let cells=document.querySelectorAll(".cell");
+    cells.forEach(c=>c.classList.add("win"));
+    setTimeout(()=>{
+      cells.forEach(c=>c.classList.remove("win"));
+    },400);
+  },300);
+}
+
+function spin(){
+  if(freeSpin===0){
+    if(saldo<bet){
+      alert("Saldo tidak cukup!");
+      return;
+    }
+    saldo-=bet;
+  }else{
+    freeSpin--;
+    hasilEl.innerText="Free Spin tersisa: "+freeSpin;
+  }
+
+  let grid = generateGrid();
+  checkScatter(grid);
+  checkWin(grid);
+  updateSaldo();
+
+  if(turbo && freeSpin>0){
+    setTimeout(spin,200);
+  }
+}
+
+function autoSpin(){
+  let interval = turbo?200:800;
+  let i=0;
+  let auto = setInterval(()=>{
+    spin();
+    i++;
+    if(i>20) clearInterval(auto);
+  },interval);
+}
+
+function turboMode(){
+  turbo = !turbo;
+  alert("Turbo "+(turbo?"ON":"OFF"));
+}
+
+updateSaldo();
+generateGrid();
+</script>
+
 </body>
 </html>
