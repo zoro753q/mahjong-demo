@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mahjong 3 Demo</title>
+<style>
+body{
+  background:#111;
+  color:white;
+  text-align:center;
+  font-family:sans-serif;
+}
+.container{
+  margin-top:50px;
+}
+button{
+  padding:15px 30px;
+  font-size:18px;
+  background:gold;
+  border:none;
+  border-radius:10px;
+}
+.box{
+  font-size:24px;
+  margin:20px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🐉 Mahjong 3 Demo</h1>
+  <h2>Saldo: Rp <span id="saldo">100000</span></h2>
+
+  <div class="box" id="hasil">Tekan SPIN</div>
+
+  <button onclick="spin()">SPIN</button>
+</div>
+
+<script>
+let saldo = 100000;
+let bet = 5000;
+
+function formatRupiah(angka){
+  return angka.toLocaleString("id-ID");
+}
+
+function spin(){
+  if(saldo <= 0){
+    alert("Saldo habis! Reset ke Rp100.000");
+    saldo = 100000;
+  }
+
+  saldo -= bet;
+
+  let random = Math.random();
+  let hasilText = "";
+  let win = 0;
+
+  // peluang naga hitam sering (30%)
+  if(random < 0.3){
+    win = bet * 10; 
+    hasilText = "🐉 NAGA HITAM MUNCUL! + Rp " + formatRupiah(win);
+  }
+  // kemenangan besar (40%)
+  else if(random < 0.7){
+    win = bet * 5;
+    hasilText = "🔥 MENANG BESAR! + Rp " + formatRupiah(win);
+  }
+  // kalah kecil (30%)
+  else{
+    hasilText = "❌ Kalah...";
+  }
+
+  saldo += win;
+
+  if(saldo <= 0){
+    saldo = 100000;
+  }
+
+  document.getElementById("saldo").innerText = formatRupiah(saldo);
+  document.getElementById("hasil").innerText = hasilText;
+}
+</script>
+
+</body>
+  </html>
