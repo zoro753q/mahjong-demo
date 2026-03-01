@@ -98,144 +98,137 @@ button{
 
 <div id="hasil"></div><script>
 let saldo = 100000;
-let bet = 1000;
-let freeSpin = 0;
+let bet = 5000;
+let auto = false;
 let turbo = false;
-let comboMulti = 1;
+let freeSpin = 0;
+let comboMultiplier = 1;
 
-const symbols = ["🀄","💰","🐉","🔔","🧧","👑","💎"];
-const wild = "⭐";
-const scatter = "🔥";
+const symbols = ["🀄","💎","🔥","竹","中","W","S"]; 
+// W = Wild, S = Scatter
 
-const gridEl = document.getElementById("grid");
-const saldoEl = document.getElementById("saldo");
-const hasilEl = document.getElementById("hasil");
+const grid = document.getElementById("grid");
+
+function format(n){ return n.toLocaleString("id-ID"); }
 
 function updateSaldo(){
-  saldoEl.innerText = "Saldo: Rp " + saldo.toLocaleString();
-  if(saldo <= 0){
-    saldo = 100000;
-    alert("Saldo habis! Reset ke Rp100.000");
-  }
+  document.getElementById("saldo").innerText =
+  "Saldo: Rp " + format(saldo) + 
+  (freeSpin>0 ? " | FREE SPIN: "+freeSpin : "");
 }
 
-function randomSymbol(){
-  let r = Math.random();
-  if(r < 0.05) return scatter;
-  if(r < 0.12) return wild;
-  return symbols[Math.floor(Math.random()*symbols.length)];
-}
-
-function generateGrid(){
-  gridEl.innerHTML = "";
-  let grid = [];
+function createGrid(){
+  grid.innerHTML="";
   for(let i=0;i<30;i++){
-    let sym = randomSymbol();
-    grid.push(sym);
-    let div = document.createElement("div");
+    let div=document.createElement("div");
     div.className="cell";
-    div.innerText=sym;
-    gridEl.appendChild(div);
-  }
-  return grid;
-}
+    let rand=Math.random();
 
-function checkScatter(grid){
-  let count = grid.filter(s=>s===scatter).length;
-  if(count >= 3){
-    freeSpin += 8;
-    hasilEl.innerText="🔥 3 Scatter! +8 Free Spins!";
+    if(rand<0.08) div.innerText="S";        // 8% scatter
+    else if(rand<0.15) div.innerText="W";   // 7% wild
+    else div.innerText=symbols[Math.floor(Math.random()*5)];
+
+    grid.appendChild(div);
   }
 }
 
-function getRandomMulti(){
-  let arr=[1,2,3,5];
-  return arr[Math.floor(Math.random()*arr.length)];
-}
-
-function highlightMulti(x){
+function randomMultiplier(){
   document.querySelectorAll(".multi").forEach(m=>m.classList.remove("active"));
-  document.getElementById("m"+x).classList.add("active");
+  let arr=[1,2,3,5];
+  let pick=arr[Math.floor(Math.random()*arr.length)];
+  document.getElementById("m"+pick).classList.add("active");
+  return pick;
 }
 
-function checkWin(grid){
+function spin(){
+  if(freeSpin<=0){
+    if(saldo<=0) saldo=100000;
+    saldo-=bet;
+  }
+
+  createGrid();
+  let multi=randomMultiplier();
+
+  setTimeout(()=>checkWin(multi), turbo?100:500);
+}
+
+function checkWin(multiplier){
+  let cells=document.querySelectorAll(".cell");
+  let countScatter=0;
   let win=0;
-  let counted={};
-  grid.forEach(s=>{
-    if(s!==scatter){
-      counted[s]=(counted[s]||0)+1;
+
+  cells.forEach(c=>{
+    c.classList.remove("win");
+    if(c.innerText=="S") countScatter++;
+  });
+
+  // 3 Scatter = 8 Free Spin
+  if(countScatter>=3){
+    freeSpin+=8;
+  }
+
+  // Hitung simbol dominan (selain scatter)
+  let countMap={};
+  cells.forEach(c=>{
+    if(c.innerText!="S"){
+      let sym=c.innerText=="W"?"wild":c.innerText;
+      countMap[sym]=(countMap[sym]||0)+1;
     }
   });
 
-  for(let key in counted){
-    if(counted[key]>=4){
-      win += bet * (counted[key]/4);
+  for(let key in countMap){
+    if(countMap[key]>=6){ // minimal 6 simbol menang
+      win = bet * multiplier * comboMultiplier;
+      cells.forEach(c=>{
+        if(c.innerText==key || c.innerText=="W")
+          c.classList.add("win");
+      });
+      cascade();
+      comboMultiplier++;
+      break;
     }
   }
 
   if(win>0){
-    let randMulti = getRandomMulti();
-    highlightMulti(randMulti);
-    comboMulti += 0.5;
-    win = win * randMulti * comboMulti;
-    saldo += win;
-    hasilEl.innerText="Menang Rp "+Math.floor(win);
-    cascade();
+    saldo+=win;
+    document.getElementById("hasil").innerText=
+    "🔥 MENANG Rp "+format(win)+" | COMBO x"+comboMultiplier;
   }else{
-    comboMulti=1;
-    hasilEl.innerText="Tidak menang";
+    comboMultiplier=1;
+    document.getElementById("hasil").innerText="❌ Tidak menang";
   }
+
+  if(freeSpin>0){
+    freeSpin--;
+    setTimeout(spin, turbo?200:800);
+  }else if(auto){
+    setTimeout(spin, turbo?200:800);
+  }
+
+  updateSaldo();
 }
 
 function cascade(){
-  setTimeout(()=>{
-    let cells=document.querySelectorAll(".cell");
-    cells.forEach(c=>c.classList.add("win"));
-    setTimeout(()=>{
-      cells.forEach(c=>c.classList.remove("win"));
-    },400);
-  },300);
-}
-
-function spin(){
-  if(freeSpin===0){
-    if(saldo<bet){
-      alert("Saldo tidak cukup!");
-      return;
+  let cells=document.querySelectorAll(".cell");
+  cells.forEach(c=>{
+    if(c.classList.contains("win")){
+      c.innerText=symbols[Math.floor(Math.random()*5)];
+      c.classList.remove("win");
     }
-    saldo-=bet;
-  }else{
-    freeSpin--;
-    hasilEl.innerText="Free Spin tersisa: "+freeSpin;
-  }
-
-  let grid = generateGrid();
-  checkScatter(grid);
-  checkWin(grid);
-  updateSaldo();
-
-  if(turbo && freeSpin>0){
-    setTimeout(spin,200);
-  }
+  });
 }
 
 function autoSpin(){
-  let interval = turbo?200:800;
-  let i=0;
-  let auto = setInterval(()=>{
-    spin();
-    i++;
-    if(i>20) clearInterval(auto);
-  },interval);
+  auto=!auto;
+  if(auto) spin();
 }
 
 function turboMode(){
-  turbo = !turbo;
-  alert("Turbo "+(turbo?"ON":"OFF"));
+  turbo=!turbo;
 }
 
 updateSaldo();
-generateGrid();
+createGrid();
 </script>
 
 </body>
