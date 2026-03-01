@@ -1,0 +1,20 @@
+body{
+    margin:0;
+    background: radial-gradient(circle at center, #1a0f0a, #000);
+    font-family:Arial;
+    color:white;
+    text-align:center;
+}
+
+header{
+    background:#200;
+    padding:10px;
+}
+
+h1{
+    color:#ffd700;
+}
+
+#saldo{
+    font-size:18px;
+}
