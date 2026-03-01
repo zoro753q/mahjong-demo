@@ -1,235 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>Dragon Mahjong Gold Demo</title>
-<style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:linear-gradient(#7a0000,#300000);
-  color:white;
-  text-align:center;
-}
-header{
-  background:linear-gradient(to right,#b8860b,#ffd700,#b8860b);
-  padding:10px;
-  color:black;
-  font-weight:bold;
-}
-#saldo{
-  margin:10px;
-  font-size:18px;
-}
-#multibar{
-  display:flex;
-  justify-content:center;
-  gap:15px;
-  margin:10px;
-}
-.multi{
-  padding:6px 12px;
-  background:#600000;
-  border-radius:10px;
-}
-.active{
-  background:gold;
-  color:black;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(5,65px);
-  gap:6px;
-  justify-content:center;
-  margin:15px 0;
-}
-.cell{
-  width:65px;
-  height:65px;
-  background:#fff8dc;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-  color:black;
-  box-shadow:0 0 5px gold;
-  transition:0.3s;
-}
-.win{
-  animation:flash 0.4s infinite alternate;
-}
-@keyframes flash{
-  from{box-shadow:0 0 5px gold;}
-  to{box-shadow:0 0 20px red;}
-}
-button{
-  padding:10px 18px;
-  border:none;
-  border-radius:20px;
-  background:gold;
-  font-weight:bold;
-  margin:5px;
-}
-#hasil{
-  height:25px;
-  margin-top:10px;
-  font-weight:bold;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oriental Cascade Demo</title>
+
+<link rel="stylesheet" href="theme.css">
+<link rel="stylesheet" href="layout.css">
+<link rel="stylesheet" href="animation.css">
+
 </head>
 <body>
 
-<header>🐉 DRAGON MAHJONG GOLD DEMO</header>
-<div id="saldo">Saldo: Rp 100.000</div>
+<header>
+    <h1>🀄 ORIENTAL CASCADE</h1>
+    <div id="saldo">Saldo: Rp100000</div>
+</header>
 
-<div id="multibar">
-  <div class="multi" id="m1">x1</div>
-  <div class="multi" id="m2">x2</div>
-  <div class="multi" id="m3">x3</div>
-  <div class="multi" id="m5">x5</div>
+<div class="game-container">
+
+    <div id="multiplier">x1</div>
+
+    <div id="grid"></div>
+
 </div>
 
-<div class="grid" id="grid"></div>
+<div class="controls">
+    <input type="number" id="betAmount" value="1000" min="100">
+    <button id="spinBtn">SPIN</button>
+</div>
 
-<button onclick="spin()">SPIN</button>
-<button onclick="autoSpin()">AUTO</button>
-<button onclick="turboMode()">TURBO</button>
+<div id="freeSpinInfo"></div>
 
-<div id="hasil"></div><script>
-let saldo = 100000;
-let bet = 5000;
-let auto = false;
-let turbo = false;
-let freeSpin = 0;
-let comboMultiplier = 1;
-
-const symbols = ["🀄","💎","🔥","竹","中","W","S"]; 
-// W = Wild, S = Scatter
-
-const grid = document.getElementById("grid");
-
-function format(n){ return n.toLocaleString("id-ID"); }
-
-function updateSaldo(){
-  document.getElementById("saldo").innerText =
-  "Saldo: Rp " + format(saldo) + 
-  (freeSpin>0 ? " | FREE SPIN: "+freeSpin : "");
-}
-
-function createGrid(){
-  grid.innerHTML="";
-  for(let i=0;i<30;i++){
-    let div=document.createElement("div");
-    div.className="cell";
-    let rand=Math.random();
-
-    if(rand<0.08) div.innerText="S";        // 8% scatter
-    else if(rand<0.15) div.innerText="W";   // 7% wild
-    else div.innerText=symbols[Math.floor(Math.random()*5)];
-
-    grid.appendChild(div);
-  }
-}
-
-function randomMultiplier(){
-  document.querySelectorAll(".multi").forEach(m=>m.classList.remove("active"));
-  let arr=[1,2,3,5];
-  let pick=arr[Math.floor(Math.random()*arr.length)];
-  document.getElementById("m"+pick).classList.add("active");
-  return pick;
-}
-
-function spin(){
-  if(freeSpin<=0){
-    if(saldo<=0) saldo=100000;
-    saldo-=bet;
-  }
-
-  createGrid();
-  let multi=randomMultiplier();
-
-  setTimeout(()=>checkWin(multi), turbo?100:500);
-}
-
-function checkWin(multiplier){
-  let cells=document.querySelectorAll(".cell");
-  let countScatter=0;
-  let win=0;
-
-  cells.forEach(c=>{
-    c.classList.remove("win");
-    if(c.innerText=="S") countScatter++;
-  });
-
-  // 3 Scatter = 8 Free Spin
-  if(countScatter>=3){
-    freeSpin+=8;
-  }
-
-  // Hitung simbol dominan (selain scatter)
-  let countMap={};
-  cells.forEach(c=>{
-    if(c.innerText!="S"){
-      let sym=c.innerText=="W"?"wild":c.innerText;
-      countMap[sym]=(countMap[sym]||0)+1;
-    }
-  });
-
-  for(let key in countMap){
-    if(countMap[key]>=6){ // minimal 6 simbol menang
-      win = bet * multiplier * comboMultiplier;
-      cells.forEach(c=>{
-        if(c.innerText==key || c.innerText=="W")
-          c.classList.add("win");
-      });
-      cascade();
-      comboMultiplier++;
-      break;
-    }
-  }
-
-  if(win>0){
-    saldo+=win;
-    document.getElementById("hasil").innerText=
-    "🔥 MENANG Rp "+format(win)+" | COMBO x"+comboMultiplier;
-  }else{
-    comboMultiplier=1;
-    document.getElementById("hasil").innerText="❌ Tidak menang";
-  }
-
-  if(freeSpin>0){
-    freeSpin--;
-    setTimeout(spin, turbo?200:800);
-  }else if(auto){
-    setTimeout(spin, turbo?200:800);
-  }
-
-  updateSaldo();
-}
-
-function cascade(){
-  let cells=document.querySelectorAll(".cell");
-  cells.forEach(c=>{
-    if(c.classList.contains("win")){
-      c.innerText=symbols[Math.floor(Math.random()*5)];
-      c.classList.remove("win");
-    }
-  });
-}
-
-function autoSpin(){
-  auto=!auto;
-  if(auto) spin();
-}
-
-function turboMode(){
-  turbo=!turbo;
-}
-
-updateSaldo();
-createGrid();
-</script>
+<script src="balance.js"></script>
+<script src="grid.js"></script>
+<script src="engine.js"></script>
+<script src="cascade.js"></script>
+<script src="bonus.js"></script>
+<script src="sound.js"></script>
 
 </body>
 </html>
