@@ -1,0 +1,17 @@
+.win{
+    animation: glow 0.5s alternate infinite;
+}
+
+@keyframes glow{
+    from{box-shadow:0 0 5px gold;}
+    to{box-shadow:0 0 20px orange;}
+}
+
+.fall{
+    animation: fall 0.3s ease-in;
+}
+
+@keyframes fall{
+    from{transform:translateY(-20px);}
+    to{transform:translateY(0);}
+}
